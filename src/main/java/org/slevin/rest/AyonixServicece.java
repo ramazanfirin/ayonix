@@ -1,6 +1,8 @@
 package org.slevin.rest;
  
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -16,6 +18,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.slevin.common.FaceMatcherPerson;
 import org.slevin.dao.FaceMatcherPersonDao;
 import org.slevin.rest.dto.SearchDTO;
 import org.slevin.util.SearchResultDTO;
@@ -93,7 +96,7 @@ public class AyonixServicece {
 			searchDTO.setId(resultDto.getPerson().getId());
 			searchDTO.setName(resultDto.getPerson().getName());
 			searchDTO.setScore(String.valueOf(resultDto.getScore()));
-			
+			searchDTO.setPath(resultDto.getPerson().getPath());
 			
 			return searchDTO;
 		} catch (Exception e) {
@@ -142,6 +145,52 @@ public class AyonixServicece {
 		
  
 	}
+	
+
+	
+	@POST
+	@Path("/comparebyid") 
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	@Produces(MediaType.APPLICATION_JSON)
+	public SearchDTO compare(@FormDataParam("id") String id,
+							 @FormDataParam("image2") InputStream is2) {
+ 
+		
+ 
+		try {
+			ServletContext  servletContext =(ServletContext) context;
+	    	BeanFactory context = WebApplicationContextUtils.getRequiredWebApplicationContext(servletContext);
+			FaceMatcherPersonDao faceMatcherPersonService= (FaceMatcherPersonDao)context.getBean("faceMatcherPersonService");
+	    	
+			FaceMatcherPerson person = faceMatcherPersonService.findById(new Long(id));
+					
+			File file = new File(person.getPath());
+			FileInputStream fin = new FileInputStream(file);
+			byte fileContent[]= new byte[(int)file.length()];
+	        fin.read(fileContent);
+	        fin.close();
+			
+	        
+	        byte[] bytes2 = getBytes(is2);
+			
+			SearchResultDTO resultDto= faceMatcherPersonService.compare(fileContent, bytes2);
+			SearchDTO searchDTO = new SearchDTO();
+//			searchDTO.setId(resultDto.getPerson().getId());
+//			searchDTO.setName(resultDto.getPerson().getName());
+			searchDTO.setScore(String.valueOf(resultDto.getScore()));
+			
+			
+			return searchDTO;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+			
+		}
+ 
+		
+ 
+	}
+	
 	
 	public byte[] getBytes(InputStream is) throws IOException{
 		ByteArrayOutputStream buffer = new ByteArrayOutputStream();

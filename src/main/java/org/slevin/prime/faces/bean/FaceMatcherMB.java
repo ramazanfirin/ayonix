@@ -64,7 +64,7 @@ public class FaceMatcherMB {
     
     @PostConstruct
     public void init() throws Exception{
-    	list = faceMatcherPersonService.findAll();
+    	//list = faceMatcherPersonService.findAll();
     }
     
     public void capture() throws IOException{

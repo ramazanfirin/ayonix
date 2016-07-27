@@ -68,12 +68,14 @@ public class FaceMB {
 	
 	@PostConstruct
 	public void init() throws Exception{
-		updateUserList();
+		//updateUserList();
 	}
 	
 	public void updateUserList() throws Exception{
 		personList = faceMatcherPersonService.findAll();
 	}
+	
+	
 	
 	public void compare() throws Exception{
 		try {
@@ -116,6 +118,7 @@ public class FaceMB {
 			updateUserList();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
+			e.printStackTrace();
 			FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,"hata", e.getMessage()));
 		}
 	}
@@ -139,6 +142,7 @@ public class FaceMB {
 			tabView.setActiveIndex(2);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
+			e.printStackTrace();
 			FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,"hata", e.getMessage()));
 		}
 	}
@@ -158,6 +162,7 @@ public class FaceMB {
 //			tabView.setActiveIndex(1);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
+			e.printStackTrace();
 			FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,"hata", e.getMessage()));
 		}
 	}
@@ -316,8 +321,6 @@ public class FaceMB {
 	public void setSelectedPerson(FaceMatcherPerson selectedPerson) {
 		this.selectedPerson = selectedPerson;
 	}
-
-	
 
 	
 	

@@ -10,7 +10,7 @@
 	<context:component-scan base-package="org.slevin" />
 
 	
-	<import resource="classpath:META-INF/spring/applicationContext-*.xml" />
+<!-- 	<import resource="classpath*:META-INF/spring/applicationContext.xml" /> -->
 	
 	
 

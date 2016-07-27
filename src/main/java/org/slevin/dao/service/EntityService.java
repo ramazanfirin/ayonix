@@ -2,6 +2,7 @@ package org.slevin.dao.service;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.Iterator;
 import java.util.List;
 
 import javassist.bytecode.SignatureAttribute.TypeVariable;
@@ -37,6 +38,16 @@ public class EntityService<E>  implements EntityDao<E> {
 	    getEntityManager().remove((E)getEntityManager().find(getEntityClass(), id));
 	}
 	
+	@Transactional
+	public void removeAll() throws Exception{     
+	    List<E> list = findAll();
+	    for (Iterator iterator = list.iterator(); iterator.hasNext();) {
+			E e = (E) iterator.next();
+			getEntityManager().remove(e);
+		}
+		
+		
+	}
 	
 	@Transactional(readOnly = true)
 	public E findById(Object id) throws Exception {     

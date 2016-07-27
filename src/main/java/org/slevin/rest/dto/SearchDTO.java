@@ -6,6 +6,8 @@ public class SearchDTO {
 	Long id;
 	String name;
 	String score;
+	String path;
+	
 	public Long getId() {
 		return id;
 	}
@@ -23,6 +25,12 @@ public class SearchDTO {
 	}
 	public void setScore(String score) {
 		this.score = score;
+	}
+	public String getPath() {
+		return path;
+	}
+	public void setPath(String path) {
+		this.path = path;
 	}
 	
 	

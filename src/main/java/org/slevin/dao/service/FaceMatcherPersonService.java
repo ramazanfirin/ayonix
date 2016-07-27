@@ -5,6 +5,9 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
@@ -31,8 +34,9 @@ public class FaceMatcherPersonService extends EntityService<FaceMatcherPerson> i
 	FaceID sdk;
 	String storePath="c:\\ayonixsdk\\";
 	
+	Vector<byte[]> afidList = new Vector<byte[]>();
 	
-	
+	HashMap<byte[], String> memory = new HashMap<byte[], String>();
 	
 	@PostConstruct
 	public void init(){
@@ -86,28 +90,46 @@ public class FaceMatcherPersonService extends EntityService<FaceMatcherPerson> i
 	}
 
 	public SearchResultDTO search(byte[] data) throws Exception{
+		Date t0 = new Date();
 		byte[] query = createAfid(data);
-		
+		Date t1 = new Date();
 		// tek yüz için geçerli
 		
         
-        Vector<byte[]> afidList = getAllAfids();
+        if(afidList.size()==0){
+        	//afidList = getAllAfids();
+        	List<FaceMatcherPerson> list = findAll();
+        	for (Iterator iterator = list.iterator(); iterator.hasNext();) {
+				FaceMatcherPerson faceMatcherPerson = (FaceMatcherPerson) iterator.next();
+				memory.put(faceMatcherPerson.getAfid(), faceMatcherPerson.getPath());
+				afidList.add(faceMatcherPerson.getAfid());
+			}
+        }	
+        Date t2 = new Date();
         
         float[] scores = new float[afidList.size()];
         int[] indexes = new int[afidList.size()];
-        
+        Date t3 = new Date();
         sdk.MatchAfids(query, afidList, scores, indexes);
+        Date t4 = new Date();
+     
         int index = Util.sort(scores);
         float score  = scores[index];
         byte[] a = afidList.get(index);
-        
-        FaceMatcherPerson person = findByPropertyUnique("afid", a);
-        System.out.println("bitti1");
+        Date t5 = new Date();
+        //FaceMatcherPerson person = findByPropertyUnique("afid", a);
+        FaceMatcherPerson person = new FaceMatcherPerson();
+        person.setPath(memory.get(a));
+        Date t6 = new Date();
 		
         SearchResultDTO result = new SearchResultDTO();
         result.setPerson(person);
         result.setScore(score);
         
+        Date t7 = new Date();
+        
+        System.out.println("total ="+(t7.getTime()-t0.getTime())+",t2 ="+(t2.getTime()-t1.getTime())+",t3="+(t3.getTime()-t2.getTime())+",t4="+(t4.getTime()-t3.getTime())+",t5="+(t5.getTime()-t4.getTime())+",t6="+(t6.getTime()-t5.getTime())+",t7="+(t7.getTime()-t6.getTime()));
+        System.out.println("asda");
         return result;
 	}
 
