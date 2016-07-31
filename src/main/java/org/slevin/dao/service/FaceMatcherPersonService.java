@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
+import java.util.concurrent.ForkJoinPool;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -17,6 +18,8 @@ import javax.imageio.ImageIO;
 
 import org.slevin.common.FaceMatcherPerson;
 import org.slevin.dao.FaceMatcherPersonDao;
+import org.slevin.util.ForkAyonix;
+import org.slevin.util.ForkDto;
 import org.slevin.util.SearchResultDTO;
 import org.slevin.util.Util;
 import org.springframework.stereotype.Component;
@@ -132,7 +135,60 @@ public class FaceMatcherPersonService extends EntityService<FaceMatcherPerson> i
         System.out.println("asda");
         return result;
 	}
-
+	public SearchResultDTO search2(byte[] data) throws Exception{
+		Date t0 = new Date();
+		byte[] query = createAfid(data);
+		Date t1 = new Date();
+		// tek yüz için geçerli
+		
+        
+        if(afidList.size()==0){
+        	//afidList = getAllAfids();
+        	List<FaceMatcherPerson> list = findAll();
+        	for (Iterator iterator = list.iterator(); iterator.hasNext();) {
+				FaceMatcherPerson faceMatcherPerson = (FaceMatcherPerson) iterator.next();
+				memory.put(faceMatcherPerson.getAfid(), faceMatcherPerson.getPath());
+				afidList.add(faceMatcherPerson.getAfid());
+			}
+        }	
+        Date t2 = new Date();
+        
+        float[] scores = new float[afidList.size()];
+        int[] indexes = new int[afidList.size()];
+        Date t3 = new Date();
+//        sdk.MatchAfids(query, afidList, scores, indexes);
+//        
+//     
+//        int index = Util.sort(scores);
+//        float score  = scores[index];
+//        byte[] a = afidList.get(index);
+        
+        final ForkJoinPool pool = new ForkJoinPool(12);
+        final ForkAyonix finder = new ForkAyonix(sdk,query,afidList);
+        ForkDto dto = pool.invoke(finder);
+        byte[] a = dto.getAfid();
+        float score = dto.getScore();
+        
+        Date t4 = new Date();
+        
+        Date t5 = new Date();
+        //FaceMatcherPerson person = findByPropertyUnique("afid", a);
+        FaceMatcherPerson person = new FaceMatcherPerson();
+        person.setPath(memory.get(a));
+        Date t6 = new Date();
+		
+        SearchResultDTO result = new SearchResultDTO();
+        result.setPerson(person);
+        result.setScore(score);
+        
+        Date t7 = new Date();
+        
+        System.out.println("total ="+(t7.getTime()-t0.getTime())+",t2 ="+(t2.getTime()-t1.getTime())+",t3="+(t3.getTime()-t2.getTime())+",t4="+(t4.getTime()-t3.getTime())+",t5="+(t5.getTime()-t4.getTime())+",t6="+(t6.getTime()-t5.getTime())+",t7="+(t7.getTime()-t6.getTime()));
+        System.out.println("asda");
+        return result;
+	}
+	
+	
 	public FaceMatcherPerson findByPropertyUnique(String property,Object value) throws Exception{
 		List<FaceMatcherPerson> a = findByProperty("afid", value);
 		if(a.size()>1)
@@ -148,20 +204,27 @@ public class FaceMatcherPersonService extends EntityService<FaceMatcherPerson> i
 	}
 
 	public SearchResultDTO compare(byte[] data, byte[] data2) throws Exception {
+		Date t0 = new Date();
+		System.out.println("method start="+t0);
 		byte[] query = createAfid(data);
 		byte[] query2 = createAfid(data2);
 		
+		Date t1 = new Date();
 		Vector<byte[]> afidList  = new Vector<byte[]>();
 		afidList.add(query2);
 		
 		float[] scores = new float[1];
         int[] indexes = new int[1];
-        
+        Date t2 = new Date();
         sdk.MatchAfids(query, afidList, scores, indexes);
         float score  = scores[0];
-        
+        Date t3 = new Date();
         SearchResultDTO result = new SearchResultDTO();
         result.setScore(score);
+Date t4 = new Date();
+        
+        System.out.println("method end="+t4);
+        System.out.println("total ="+(t4.getTime()-t0.getTime())+",t2 ="+(t2.getTime()-t1.getTime())+",t3="+(t3.getTime()-t2.getTime())+",t4="+(t4.getTime()-t3.getTime()));
         
         return result;
 	}

@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Date;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
@@ -101,13 +102,52 @@ public class AyonixServicece {
 			return searchDTO;
 		} catch (Exception e) {
 			e.printStackTrace();
-			return null;
+			SearchDTO searchDTO = new SearchDTO();
+			searchDTO.setScore(e.getMessage());
+			return searchDTO;
 			
 		}
  
 		
  
 	}
+	
+	
+	@POST
+	@Path("/searchByParalel") 
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	@Produces(MediaType.APPLICATION_JSON)
+	public SearchDTO searchByParalel(@FormDataParam("image") InputStream is) {
+ 
+		
+ 
+		try {
+			ServletContext  servletContext =(ServletContext) context;
+	    	BeanFactory context = WebApplicationContextUtils.getRequiredWebApplicationContext(servletContext);
+			FaceMatcherPersonDao faceMatcherPersonService= (FaceMatcherPersonDao)context.getBean("faceMatcherPersonService");
+	    	
+			
+			byte[] bytes = getBytes(is);
+			SearchResultDTO resultDto= faceMatcherPersonService.search2(bytes);
+			SearchDTO searchDTO = new SearchDTO();
+			searchDTO.setId(resultDto.getPerson().getId());
+			searchDTO.setName(resultDto.getPerson().getName());
+			searchDTO.setScore(String.valueOf(resultDto.getScore()));
+			searchDTO.setPath(resultDto.getPerson().getPath());
+			
+			return searchDTO;
+		} catch (Exception e) {
+			e.printStackTrace();
+			SearchDTO searchDTO = new SearchDTO();
+			searchDTO.setScore(e.getMessage());
+			return searchDTO;
+			
+		}
+ 
+		
+ 
+	}
+	
 	
 	
 	@POST
@@ -120,6 +160,8 @@ public class AyonixServicece {
 		
  
 		try {
+			Date t0 = new Date();
+			System.out.println("rest t0="+t0);
 			ServletContext  servletContext =(ServletContext) context;
 	    	BeanFactory context = WebApplicationContextUtils.getRequiredWebApplicationContext(servletContext);
 			FaceMatcherPersonDao faceMatcherPersonService= (FaceMatcherPersonDao)context.getBean("faceMatcherPersonService");
@@ -127,18 +169,24 @@ public class AyonixServicece {
 			
 			byte[] bytes1 = getBytes(is1);
 			byte[] bytes2 = getBytes(is2);
-			
+			//bytes2.length
+			Date t1 = new Date();
+			System.out.println("rest t1="+t1+" duration="+(t1.getTime()-t0.getTime()));
 			SearchResultDTO resultDto= faceMatcherPersonService.compare(bytes1, bytes2);
 			SearchDTO searchDTO = new SearchDTO();
 //			searchDTO.setId(resultDto.getPerson().getId());
 //			searchDTO.setName(resultDto.getPerson().getName());
 			searchDTO.setScore(String.valueOf(resultDto.getScore()));
-			
+			Date t2 = new Date();
+			System.out.println("rest t2="+t2);
+			System.out.println("rest duration = "+(t2.getTime()-t0.getTime()));
 			
 			return searchDTO;
 		} catch (Exception e) {
 			e.printStackTrace();
-			return null;
+			SearchDTO searchDTO = new SearchDTO();
+			searchDTO.setScore(e.getMessage());
+			return searchDTO;
 			
 		}
  
@@ -183,7 +231,9 @@ public class AyonixServicece {
 			return searchDTO;
 		} catch (Exception e) {
 			e.printStackTrace();
-			return null;
+			SearchDTO searchDTO = new SearchDTO();
+			searchDTO.setScore(e.getMessage());
+			return searchDTO;
 			
 		}
  
@@ -196,7 +246,7 @@ public class AyonixServicece {
 		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 
 		int nRead;
-		byte[] data = new byte[16384];
+		byte[] data = new byte[16384000];
 
 		while ((nRead = is.read(data, 0, data.length)) != -1) {
 		  buffer.write(data, 0, nRead);

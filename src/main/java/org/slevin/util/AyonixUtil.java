@@ -29,7 +29,7 @@ public class AyonixUtil {
 	static String key="d80b29ccc96546b2a333edd5641188b6";
 	static String keyTagging = "b8a644dd5dc54109b8832fdef2013a8a";
 	static String server="ec2-52-29-227-237.eu-central-1.compute.amazonaws.com";
-	//static String url ="http://"+"ec2-52-29-227-237.eu-central-1.compute.amazonaws.com"+":8080/ayonix/rest/hello";
+	//static String url ="http://"+"ec2-52-59-37-65.eu-central-1.compute.amazonaws.com"+":8080/ayonix/rest/hello";
 	static String url ="http://"+"localhost"+":8080/primefaces-spring-jpa-tutorial/rest/hello";
 	
 	public static void main(String[] args) throws Exception {
@@ -47,13 +47,29 @@ public class AyonixUtil {
         fin2.read(fileContent2);
         fin2.close();
         
+        File file3 = new File("C:\\Users\\ETR00529\\Desktop\\erhan.PNG");
+        file3 = new File("E:\\ayonix\\salih\\2130837583-1160422452.jpg");
+		FileInputStream fin3 = new FileInputStream(file3);
+		byte fileContent3[]= new byte[(int)file3.length()];
+        fin3.read(fileContent3);
+        fin3.close();
+        
+        File file4 = new File("C:\\Users\\ETR00529\\Desktop\\erhan.PNG");
+        file4 = new File("E:\\ayonix\\salih\\JPEG_20160727_212915_1306455468.jpg");
+		FileInputStream fin4 = new FileInputStream(file4);
+		byte fileContent4[]= new byte[(int)file4.length()];
+        fin4.read(fileContent4);
+        fin4.close();
         
         Date date1 = new Date();
+        System.out.println("client start="+date1);
         // String result = enroll("ali","aydin",fileContent);
-        String result = search(fileContent);
-        System.out.println(result);
-        //compate(fileContent, fileContent);
+      // result = search2(fileContent);
+//        System.out.println(result);
+        compate(fileContent, fileContent);
+        //compateById("1", fileContent);
         Date date2 = new Date();
+        System.out.println("client end="+date2);
        // ApiResult a =parseResponse(result);
         
        
@@ -230,6 +246,90 @@ int statusCode = response.getStatusLine().getStatusCode();
 	    }
 	
 	 
+	 public static String search2(byte[] data) throws Exception
+	    {
+	        HttpClient httpclient = HttpClients.createDefault();
+
+	        try
+	        {
+	            URIBuilder builder = new URIBuilder(url+"/searchByParalel");
+	            									// https://api.projectoxford.ai/vision/v1.0/analyze?visualFeatures=Categories
+
+	            //builder.setParameter("visualFeatures", "All");
+	            //builder.setParameter("faceRectangles", "{string}");
+
+	            URI uri = builder.build();
+	            HttpPost request = new HttpPost(uri);
+	            
+//	            request.setHeader("Content-Type", "application/octet-stream");
+//	            request.setHeader("Ocp-Apim-Subscription-Key", keyTagging);
+
+
+	            // Request body
+	            
+	            
+	           // StringEntity reqEntity = new StringEntity("{body}");
+	            
+//	            File file = new File(path);
+//	            FileInputStream fin = new FileInputStream(file);byte fileContent[]
+//	             = new byte[(int)file.length()];
+//	            fin.read(fileContent);
+//	            fin.close();
+	            
+	            ByteArrayBody fileBody = new ByteArrayBody(data,"aa");
+	            fileBody.getContentLength();
+	            
+//	            StringBody function = new StringBody("enrollperson",ContentType.TEXT_PLAIN);
+//	            StringBody appid = new StringBody("3926BEDE-5E64-0F45-89B7-76504845DDC9",ContentType.TEXT_PLAIN);
+//	            StringBody format = new StringBody("json",ContentType.TEXT_PLAIN);
+//	            StringBody action = new StringBody("call",ContentType.TEXT_PLAIN);
+//	            StringBody nameBody = new StringBody(name,ContentType.TEXT_PLAIN);
+	           
+
+	            HttpEntity reqEntity = MultipartEntityBuilder.create()
+	                    .addPart("image", fileBody)
+	                   
+	                    .build();
+
+	            
+	            
+	            
+//	            ByteArrayEntity reqEntity = new ByteArrayEntity(data);
+//	            request.setEntity(reqEntity);
+//	           
+	            request.setEntity(reqEntity);
+	            
+	            
+	            HttpResponse response = httpclient.execute(request);
+	           HttpEntity entity = response.getEntity();
+int statusCode = response.getStatusLine().getStatusCode();
+	          System.out.println(statusCode); 
+	          
+	          if (entity != null) 
+	            {
+	            	String aa=EntityUtils.toString(entity);
+	            	System.out.println(aa);
+//	            	JSONParser parser = new JSONParser();
+//	       		 	JSONObject obj = (JSONObject)parser.parse(aa);
+//               String result = (String)obj.get("result");	
+//               if(result.equals("OK")){
+//               	String userId = (String)obj.get("userid");
+//               	return userId;
+//               }else
+//               	throw new Exception();
+	            }
+	        }
+	        catch (Exception e)
+	        {
+	            System.out.println(e.getMessage());
+	            throw e;
+	        }
+	        
+	        return "";
+	    }
+	
+	 
+	 
 	 
 	 
 	 
@@ -240,8 +340,8 @@ int statusCode = response.getStatusLine().getStatusCode();
 
 	        try
 	        {
-	            URIBuilder builder = new URIBuilder("http://localhost:8080/primefaces-spring-jpa-tutorial/rest/hello/compare");
-	           // URIBuilder builder = new URIBuilder("http://ec2-52-29-227-237.eu-central-1.compute.amazonaws.com:8080/ayonix/rest/hello/compare");
+	            URIBuilder builder = new URIBuilder("http://ec2-52-59-37-65.eu-central-1.compute.amazonaws.com:8080/primefaces-spring-jpa-tutorial/rest/hello/compare");
+	           // URIBuilder builder = new URIBuilder("http://ec2-52-59-37-65.eu-central-1.compute.amazonaws.com:8080/ayonix/rest/hello/compare");
 	            									// https://api.projectoxford.ai/vision/v1.0/analyze?visualFeatures=Categories
 
 	            //builder.setParameter("visualFeatures", "All");
@@ -289,9 +389,11 @@ int statusCode = response.getStatusLine().getStatusCode();
 //	           
 	            request.setEntity(reqEntity);
 	            
-	            
+	            Date d1= new Date();
 	            HttpResponse response = httpclient.execute(request);
-	           HttpEntity entity = response.getEntity();
+	            Date d2= new Date();
+	            System.out.println("sure:="+(d2.getTime()-d1.getTime())); 
+	            HttpEntity entity = response.getEntity();
 int statusCode = response.getStatusLine().getStatusCode();
 	          System.out.println(statusCode); 
 	          
@@ -325,7 +427,7 @@ int statusCode = response.getStatusLine().getStatusCode();
 
 	        try
 	        {
-	            URIBuilder builder = new URIBuilder("http://localhost:8080/primefaces-spring-jpa-tutorial/rest/hello/comparebyid");
+	            URIBuilder builder = new URIBuilder("http://ec2-52-59-37-65.eu-central-1.compute.amazonaws.com:8080/primefaces-spring-jpa-tutorial/rest/hello/comparebyid");
 	            									// https://api.projectoxford.ai/vision/v1.0/analyze?visualFeatures=Categories
 
 	            //builder.setParameter("visualFeatures", "All");

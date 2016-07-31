@@ -16,11 +16,10 @@ public class ForkAyonix extends RecursiveTask<ForkDto> {
 	 */
 	private static final long serialVersionUID = 1L;
 
-private static final int SEQUENTIAL_THRESHOLD = 100;
+private static final int SEQUENTIAL_THRESHOLD = 100000;
  
   //private final int[] data;
-  private final int start;
-  private final int end;
+ 
   
   byte[] query=null;
   
@@ -30,11 +29,10 @@ private static final int SEQUENTIAL_THRESHOLD = 100;
   int[] indexes ;
   FaceID sdk;
  
-  public ForkAyonix(FaceID _sdk,byte[] _query,Vector<byte[]> _afidList,int _start,int _end) {
+  public ForkAyonix(FaceID _sdk,byte[] _query,Vector<byte[]> _afidList) {
 	  afidList = _afidList;
 	  query = _query;
-	  start = _start;
-	  end = _end;
+
   
 	  scores = new float[afidList.size()];
       indexes = new int[afidList.size()];
@@ -46,14 +44,15 @@ private static final int SEQUENTIAL_THRESHOLD = 100;
  
   @Override
   protected ForkDto compute() {
-    final int length = end - start;
+    final int length = afidList.size();
     if (length < SEQUENTIAL_THRESHOLD) {
       return computeDirectly();
     }
     final int split = length / 2;
-    final ForkAyonix left = new ForkAyonix(sdk,query,afidList, start, start + split);
+        
+    final ForkAyonix left = new ForkAyonix(sdk,query,convertToVector(afidList,0,split));
     left.fork();
-    final ForkAyonix right = new ForkAyonix(sdk,query,afidList, start + split, end);
+    final ForkAyonix right = new ForkAyonix(sdk,query,convertToVector(afidList,split,length));
     ForkDto dto1 = right.compute();
     ForkDto dto2 =  left.join();
     if(dto1.getScore()>=dto2.getScore())
@@ -62,9 +61,17 @@ private static final int SEQUENTIAL_THRESHOLD = 100;
     	return dto2;
 
   }
+  
+  public Vector<byte[]> convertToVector(Vector<byte[]> list,int start,int end){
+	  Vector<byte[]> result = new Vector<byte[]>();
+	  for (int i = start; i < end; i++) {
+		  result.add(list.get(i));
+	}
+	  return result;
+  }
  
   private ForkDto computeDirectly() {
-	   System.out.println(Thread.currentThread() + " computing: " + start                       + " to " + end);
+	   //System.out.println(Thread.currentThread() + " computing: ");
 	   sdk.MatchAfids(query, afidList, scores, indexes); 
 	   int index = Util.sort(scores);
 	   float score  = scores[index];

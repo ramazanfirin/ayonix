@@ -62,6 +62,7 @@ private static final int SEQUENTIAL_THRESHOLD = 5;
     // submit the task to the pool
     final ForkJoinPool pool = new ForkJoinPool(4);
     final Fork finder = new Fork(data);
-    System.out.println(pool.invoke(finder));
+    int a = pool.invoke(finder);
+    System.out.println("merhaba "+ a);
   }
 }

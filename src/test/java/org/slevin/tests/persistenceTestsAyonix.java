@@ -46,11 +46,11 @@ public class persistenceTestsAyonix implements ApplicationContextAware {
         
         applicationContext.getBeanDefinitionCount();
 		
-        ServletContext  servletContext =(ServletContext) context;
-    	BeanFactory context = WebApplicationContextUtils.getRequiredWebApplicationContext(servletContext);
-		FaceMatcherPersonDao faceMatcherPersonService= (FaceMatcherPersonDao)context.getBean("faceMatcherPersonService");
+//        ServletContext  servletContext =(ServletContext) context;
+//    	BeanFactory context = WebApplicationContextUtils.getRequiredWebApplicationContext(servletContext);
+//		FaceMatcherPersonDao faceMatcherPersonService= (FaceMatcherPersonDao)context.getBean("faceMatcherPersonService");
 		
-		System.out.println("asasd");
+		System.out.println(applicationContext.getBeanDefinitionCount());
 	}
 	
 
