@@ -20,4 +20,13 @@ public class Util {
 
 		return index;
 	}
+	public static void chechCpu(){
+		int processors = Runtime.getRuntime().availableProcessors();
+		System.out.println(processors);
+		System.out.println(System.getenv("NUMBER_OF_PROCESSORS"));
+	}
+	
+	public static void main(String[] args) {
+		chechCpu();
+	}
 }

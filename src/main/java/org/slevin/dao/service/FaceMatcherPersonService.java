@@ -15,6 +15,7 @@ import java.util.concurrent.ForkJoinPool;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.imageio.ImageIO;
+import javax.servlet.ServletContext;
 
 import org.slevin.common.FaceMatcherPerson;
 import org.slevin.dao.FaceMatcherPersonDao;
@@ -22,6 +23,7 @@ import org.slevin.util.ForkAyonix;
 import org.slevin.util.ForkDto;
 import org.slevin.util.SearchResultDTO;
 import org.slevin.util.Util;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +36,9 @@ import ayonix.FaceID;
 @Transactional
 public class FaceMatcherPersonService extends EntityService<FaceMatcherPerson> implements FaceMatcherPersonDao {
 
+	@Autowired
+	private ServletContext context;
+	
 	FaceID sdk;
 	String storePath="c:\\ayonixsdk\\";
 	
@@ -49,6 +54,8 @@ public class FaceMatcherPersonService extends EntityService<FaceMatcherPerson> i
         
         int nthreads = (int)sdk.GetParam(FaceID.PARAM_NTHREADS);
         System.out.println("NThreads: " + nthreads);
+        
+        context.setAttribute("sdk", sdk);
 	}
 	
 	@PreDestroy
@@ -60,6 +67,9 @@ public class FaceMatcherPersonService extends EntityService<FaceMatcherPerson> i
 	public byte[] createAfid(byte[] data) throws Exception{
 		 AynxImage img = sdk.LoadImage(data);
 		 AynxFace[] faces = sdk.DetectFaces(img);
+		 
+		 AynxFace a = new AynxFace();
+		 a.setMugshotData(data);
 		 
 		 if(faces.length==0){
 			 throw new Exception("no face detected");
@@ -78,7 +88,7 @@ public class FaceMatcherPersonService extends EntityService<FaceMatcherPerson> i
 
 		 byte[] afidi = createAfid(data);
 		 
-		 String newFileName = storePath+fileName+".jpg";
+		 String newFileName = storePath+fileName;
 		 InputStream in = new ByteArrayInputStream(data);
 		 BufferedImage bImageFromConvert = ImageIO.read(in);
 		 ImageIO.write(bImageFromConvert, "jpg",new File(newFileName));
@@ -131,8 +141,8 @@ public class FaceMatcherPersonService extends EntityService<FaceMatcherPerson> i
         
         Date t7 = new Date();
         
-        System.out.println("total ="+(t7.getTime()-t0.getTime())+",t2 ="+(t2.getTime()-t1.getTime())+",t3="+(t3.getTime()-t2.getTime())+",t4="+(t4.getTime()-t3.getTime())+",t5="+(t5.getTime()-t4.getTime())+",t6="+(t6.getTime()-t5.getTime())+",t7="+(t7.getTime()-t6.getTime()));
-        System.out.println("asda");
+       // System.out.println("total ="+(t7.getTime()-t0.getTime())+",t2 ="+(t2.getTime()-t1.getTime())+",t3="+(t3.getTime()-t2.getTime())+",t4="+(t4.getTime()-t3.getTime())+",t5="+(t5.getTime()-t4.getTime())+",t6="+(t6.getTime()-t5.getTime())+",t7="+(t7.getTime()-t6.getTime()));
+        System.out.println("search method:"+(t7.getTime()-t0.getTime()));
         return result;
 	}
 	public SearchResultDTO search2(byte[] data) throws Exception{
@@ -229,6 +239,37 @@ Date t4 = new Date();
         return result;
 	}
 
+	public SearchResultDTO compare(String id, byte[] data2) throws Exception {
+		Date t0 = new Date();;
+		System.out.println("method start="+t0);
+		
+		FaceMatcherPerson person =findById(new Long(id));
+		byte[] query = person.getAfid();
+		byte[] query2 = createAfid(data2);
+		
+			
+		Date t1 = new Date();
+		Vector<byte[]> afidList  = new Vector<byte[]>();
+		afidList.add(query2);
+		
+		
+		
+		float[] scores = new float[1];
+        int[] indexes = new int[1];
+        Date t2 = new Date();
+        sdk.MatchAfids(query, afidList, scores, indexes);
+        float score  = scores[0];
+        Date t3 = new Date();
+        SearchResultDTO result = new SearchResultDTO();
+        result.setScore(score);
+Date t4 = new Date();
+        
+        System.out.println("method end="+t4);
+        System.out.println("total ="+(t4.getTime()-t0.getTime())+",t2 ="+(t2.getTime()-t1.getTime())+",t3="+(t3.getTime()-t2.getTime())+",t4="+(t4.getTime()-t3.getTime()));
+        
+        return result;
+	}
+	
 	@Override
 	public Vector<byte[]> getAllAfids() throws Exception {
 		Vector<byte[]> v = new Vector<byte[]>();
@@ -239,6 +280,14 @@ Date t4 = new Date();
 		v.addAll(l);
 		
 		return v;
+	}
+
+	public FaceID getSdk() {
+		return sdk;
+	}
+
+	public void setSdk(FaceID sdk) {
+		this.sdk = sdk;
 	}
 
 	

@@ -19,7 +19,7 @@ public class AynxFace
         
         private byte[] reserved;
 
-        private AynxFace() {}   // prevent user creation
+//        private AynxFace() {}   // prevent user creation
 
         public Rectangle getLocation() { return location; }
         public Rectangle getMugshotLocation() { return mugshotLocation; }
@@ -30,5 +30,11 @@ public class AynxFace
         public float getGender() { return gender; }
         public int getAge() { return age; }
         public float[] getAngles() { return rpy; }
+		public byte[] getMugshotData() {
+			return mugshotData;
+		}
+		public void setMugshotData(byte[] mugshotData) {
+			this.mugshotData = mugshotData;
+		}
 }
 
